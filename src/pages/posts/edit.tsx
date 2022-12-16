@@ -1,5 +1,5 @@
 import { useSelect, HttpError } from "@pankod/refine-core";
-import { useStepsForm } from "@pankod/refine-react-hook-form";
+import { useFieldArray, useStepsForm } from "@pankod/refine-react-hook-form";
 
 import { IPost } from "interfaces";
 
@@ -10,14 +10,26 @@ export const PostEdit: React.FC = () => {
         refineCore: { onFinish, formLoading, queryResult },
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, dirtyFields },
+        control,
         steps: { currentStep, gotoStep },
     } = useStepsForm<IPost, HttpError, IPost>();
 
+    const { update, replace } = useFieldArray({
+      control: control,
+      name: "names",
+    })
+    
     const { options } = useSelect({
         resource: "categories",
         defaultValue: queryResult?.data?.data.category.id,
     });
+
+
+    const changeFirstname = (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault()
+        update(0, { firstname: `new firstname${Math.floor(Math.random()*100)}` })
+      }
 
     const renderFormByStep = (step: number) => {
         switch (step) {
@@ -35,52 +47,67 @@ export const PostEdit: React.FC = () => {
                 );
             case 1:
                 return (
-                    <>
-                        <label>Status: </label>
-                        <select {...register("status")}>
-                            <option value="published">published</option>
-                            <option value="draft">draft</option>
-                            <option value="rejected">rejected</option>
-                        </select>
-                    </>
-                );
-            case 2:
-                return (
-                    <>
-                        <label>Category: </label>
-                        <select
-                            {...register("category.id", {
-                                required: "This field is required",
-                            })}
-                            defaultValue={queryResult?.data?.data.category.id}
-                        >
-                            {options?.map((category) => (
-                                <option
-                                    key={category.value}
-                                    value={category.value}
-                                >
-                                    {category.label}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.category && (
-                            <span>{errors.category.message}</span>
-                        )}
-                        <br />
-                        <br />
-                        <label>Content: </label>
-                        <textarea
-                            {...register("content", {
-                                required: "This field is required",
-                            })}
-                            rows={10}
-                            cols={50}
+                    <div>
+                      <h1>Dirty Fields: </h1>
+                      <p>{JSON.stringify(dirtyFields)}</p>
+                      <label>Status: </label>
+                      <select {...register("status")}>
+                        <option value="published">published</option>
+                        <option value="draft">draft</option>
+                        <option value="rejected">rejected</option>
+                      </select>
+          
+                      <div>
+                        <label>names.0.firstname: </label>
+                        <input
+                          {...register("names.0.firstname", {
+                            required: "This field is required",
+                            
+                          })}
+                          disabled
                         />
-                        {errors.content && (
-                            <span>{errors.content.message}</span>
-                        )}
-                    </>
-                );
+                         <button onClick={(e) => changeFirstname(e)}>klick this to use update() from useFieldArray</button>
+                      </div>
+                    </div>
+                  )
+            case 2:
+                break;
+                // return (
+                //     <>
+                //         <label>Category: </label>
+                //         <select
+                //             {...register("category.id", {
+                //                 required: "This field is required",
+                //             })}
+                //             defaultValue={queryResult?.data?.data.category.id}
+                //         >
+                //             {options?.map((category) => (
+                //                 <option
+                //                     key={category.value}
+                //                     value={category.value}
+                //                 >
+                //                     {category.label}
+                //                 </option>
+                //             ))}
+                //         </select>
+                //         {errors.category && (
+                //             <span>{errors.category.message}</span>
+                //         )}
+                //         <br />
+                //         <br />
+                //         <label>Content: </label>
+                //         <textarea
+                //             {...register("content", {
+                //                 required: "This field is required",
+                //             })}
+                //             rows={10}
+                //             cols={50}
+                //         />
+                //         {errors.content && (
+                //             <span>{errors.content.message}</span>
+                //         )}
+                //     </>
+                // );
         }
     };
 

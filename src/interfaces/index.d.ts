@@ -10,4 +10,7 @@ export interface IPost {
     category: {
         id: ICategory["id"];
     };
+    names: {
+        firstname: string
+    }[]
 }

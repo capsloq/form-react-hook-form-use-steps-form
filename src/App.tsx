@@ -4,6 +4,7 @@ import dataProvider from "@pankod/refine-simple-rest";
 
 import { PostCreate, PostEdit, PostList } from "pages/posts";
 
+
 const App: React.FC = () => {
     return (
         <Refine
